@@ -10,7 +10,6 @@
   <url>https://github.com/uscauv/vision_direction_marker_detector</url>
   <depend package="rospy"/>
   <depend package="roscpp"/>
-  <depend package="actionlib"/>
 
 </package>
 
