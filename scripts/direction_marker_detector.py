@@ -38,6 +38,9 @@ def hull_filter(hull):
     return True
 
 class DirectionMarkerDetector:
+    def __init__(self):
+        pass
+
     def find(self, img):
         """
         Detect direction markers. These are the orange markers on the bottom of the pool that point ot the next objective.
