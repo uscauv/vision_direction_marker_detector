@@ -53,7 +53,11 @@ class DirectionMarkerDetector:
         # TODO: get rid of these magic numbers
         bin = vision_common.hsv_threshold(img, 20, 175, 0, 255, 0, 255)
 
-        contours, hierarchy = cv2.findContours(bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        canny = vision_common.canny(bin, 50)
+
+        # find contours after first processing it with Canny edge detection
+        contours, hierarchy = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
         hulls = vision_common.convex_hulls(contours)
         cv2.drawContours(bin, hulls, -1, 255)
 
@@ -64,6 +68,8 @@ class DirectionMarkerDetector:
         cv2.drawContours(img, hulls, -1, (0, 102, 255), -1)
         # draw green outlines so we know it actually detected it
         cv2.drawContours(img, hulls, -1, (0, 255, 0), 2)
+
+        cv2.imshow('img', img)
 
         return map(vision_common.angle, map(lambda hull: cv2.minAreaRect(hull), hulls))
 
