@@ -37,46 +37,42 @@ def hull_filter(hull):
         return False
     return True
 
-class DirectionMarkerDetector:
-    def __init__(self):
-        pass
+def find(img, hue_min=20, hue_max=175, sat_min=0, sat_max=255, val_min=0, val_max=255):
+    """
+    Detect direction markers. These are the orange markers on the bottom of the pool that point ot the next objective.
+    :param img: HSV image from the bottom camera
+    :return: a list of tuples indicating the rectangles detected (center, width x height, angle)
+    """
 
-    def find(self, img):
-        """
-        Detect direction markers. These are the orange markers on the bottom of the pool that point ot the next objective.
-        :param img: HSV image from the bottom camera
-        :return: a list of tuples indicating the rectangles detected (center, width x height, angle)
-        """
+    img = np.copy(img)
 
-        img = np.copy(img)
+    bin = vision_common.hsv_threshold(img, hue_min, hue_max, sat_min, sat_max, val_min, val_max)
 
-        # TODO: get rid of these magic numbers
-        bin = vision_common.hsv_threshold(img, 20, 175, 0, 255, 0, 255)
+    canny = vision_common.canny(bin, 50)
 
-        canny = vision_common.canny(bin, 50)
+    # find contours after first processing it with Canny edge detection
+    contours, hierarchy = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # find contours after first processing it with Canny edge detection
-        contours, hierarchy = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    hulls = vision_common.convex_hulls(contours)
+    cv2.drawContours(bin, hulls, -1, 255)
 
-        hulls = vision_common.convex_hulls(contours)
-        cv2.drawContours(bin, hulls, -1, 255)
+    # remove convex hulls that don't pass our scoring threshold
+    hulls = filter(hull_filter, hulls)
 
-        # remove convex hulls that don't pass our scoring threshold
-        hulls = filter(hull_filter, hulls)
+    # draw hulls in Blaze Orange
+    cv2.drawContours(img, hulls, -1, (0, 102, 255), -1)
+    # draw green outlines so we know it actually detected it
+    cv2.drawContours(img, hulls, -1, (0, 255, 0), 2)
 
-        # draw hulls in Blaze Orange
-        cv2.drawContours(img, hulls, -1, (0, 102, 255), -1)
-        # draw green outlines so we know it actually detected it
-        cv2.drawContours(img, hulls, -1, (0, 255, 0), 2)
-
-        cv2.imshow('img', img)
-
-        return map(vision_common.angle, map(lambda hull: cv2.minAreaRect(hull), hulls))
-
+    rects = map(lambda hull: cv2.minAreaRect(hull), hulls)
+    # shape[0] is the number of rows because matrices are dumb
+    rects = map(lambda rect: ((rect[0][1] / img.shape[1], rect[0][0] / img.shape[0]), rect[1], vision_common.angle(rect)), rects)
+    # convert to the targeting system of [-1, 1]
+    rects = map(lambda rect: (((rect[0][0] * 2) - 1, (rect[0][1] * 2) - 1), rect[1], rect[2]), rects)
+    return rects
 
 img = cv2.imread('sample.jpg', cv2.IMREAD_COLOR)
-detector = DirectionMarkerDetector()
-rects = detector.find(img)
+rects = find(img)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
