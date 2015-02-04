@@ -37,6 +37,7 @@ def hull_filter(hull):
         return False
     return True
 
+
 def find(img, hue_min=20, hue_max=175, sat_min=0, sat_max=255, val_min=0, val_max=255):
     """
     Detect direction markers. These are the orange markers on the bottom of the pool that point ot the next objective.
@@ -66,13 +67,17 @@ def find(img, hue_min=20, hue_max=175, sat_min=0, sat_max=255, val_min=0, val_ma
 
     rects = map(lambda hull: cv2.minAreaRect(hull), hulls)
     # shape[0] is the number of rows because matrices are dumb
-    rects = map(lambda rect: ((rect[0][1] / img.shape[1], rect[0][0] / img.shape[0]), rect[1], vision_common.angle(rect)), rects)
+    rects = map(
+        lambda rect: ((rect[0][1] / img.shape[1], rect[0][0] / img.shape[0]), rect[1], vision_common.angle(rect)),
+        rects)
     # convert to the targeting system of [-1, 1]
     rects = map(lambda rect: (((rect[0][0] * 2) - 1, (rect[0][1] * 2) - 1), rect[1], rect[2]), rects)
     return rects
 
-img = cv2.imread('sample.jpg', cv2.IMREAD_COLOR)
-rects = find(img)
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+if __name__ == '__main__':
+    img = cv2.imread('sample.jpg', cv2.IMREAD_COLOR)
+    rects = find(img)
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
