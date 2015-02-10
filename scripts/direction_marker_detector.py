@@ -16,8 +16,12 @@ def hull_score(hull):
     shorter_side = min(rect[1])
     longer_side = max(rect[1])
 
-    # the marker is 6 inches by 4 feet so the ratio of long : short = 8
-    ratio_score = 1 / abs((longer_side / shorter_side) - 8)
+    ratio_score = 0.0
+
+    # check to make sure the size is defined to prevent possible division by 0 error
+    if shorter_side != 0 and longer_side != 0:
+        # the marker is 6 inches by 4 feet so the ratio of long : short = 8
+        ratio_score = 100 - abs((longer_side / shorter_side) - 8)
 
     # cut off minimum area at 100 px^2
     if cv2.contourArea(hull) < 100:
@@ -38,7 +42,7 @@ def hull_filter(hull):
     return True
 
 
-def find(img, hue_min=20, hue_max=175, sat_min=0, sat_max=255, val_min=0, val_max=255):
+def find(img, hue_min=125, hue_max=175, sat_min=240, sat_max=255, val_min=215, val_max=255):
     """
     Detect direction markers. These are the orange markers on the bottom of the pool that point ot the next objective.
     :param img: HSV image from the bottom camera
@@ -48,6 +52,7 @@ def find(img, hue_min=20, hue_max=175, sat_min=0, sat_max=255, val_min=0, val_ma
     img = np.copy(img)
 
     bin = vision_common.hsv_threshold(img, hue_min, hue_max, sat_min, sat_max, val_min, val_max)
+    cv2.imshow('bin', bin)
 
     canny = vision_common.canny(bin, 50)
 
@@ -72,12 +77,31 @@ def find(img, hue_min=20, hue_max=175, sat_min=0, sat_max=255, val_min=0, val_ma
         rects)
     # convert to the targeting system of [-1, 1]
     rects = map(lambda rect: (((rect[0][0] * 2) - 1, (rect[0][1] * 2) - 1), rect[1], rect[2]), rects)
+
+    # cv2.imshow('result', img)
+
     return rects
 
 
+def nothing(x):
+    pass
+
+
 if __name__ == '__main__':
+    # cv2.namedWindow('bin')
+    # cv2.createTrackbar('min', 'bin', 0, 255, nothing)
+    # cv2.createTrackbar('max', 'bin', 0, 255, nothing)
+
     img = cv2.imread('sample.jpg', cv2.IMREAD_COLOR)
+
+    # while True:
+    #     find(img, val_min=cv2.getTrackbarPos('min', 'bin'), val_max=cv2.getTrackbarPos('max', 'bin'))
+    #     print(cv2.getTrackbarPos('min', 'bin'), cv2.getTrackbarPos('max', 'bin'))
+    #     cv2.waitKey(1)
+
     rects = find(img)
+
+    # cv2.imshow('img', img)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
