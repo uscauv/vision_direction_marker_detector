@@ -42,7 +42,7 @@ def hull_filter(hull):
     return True
 
 
-def find(img, hue_min=125, hue_max=175, sat_min=240, sat_max=255, val_min=215, val_max=255):
+def find(img, hue_min=125, hue_max=175, sat_min=240, sat_max=255, val_min=215, val_max=255, output_images={}):
     """
     Detect direction markers. These are the orange markers on the bottom of the pool that point ot the next objective.
     :param img: HSV image from the bottom camera
@@ -52,7 +52,7 @@ def find(img, hue_min=125, hue_max=175, sat_min=240, sat_max=255, val_min=215, v
     img = np.copy(img)
 
     bin = vision_common.hsv_threshold(img, hue_min, hue_max, sat_min, sat_max, val_min, val_max)
-    cv2.imshow('bin', bin)
+    output_images['bin'] = bin
 
     canny = vision_common.canny(bin, 50)
 
@@ -78,7 +78,7 @@ def find(img, hue_min=125, hue_max=175, sat_min=240, sat_max=255, val_min=215, v
     # convert to the targeting system of [-1, 1]
     rects = map(lambda rect: (((rect[0][0] * 2) - 1, (rect[0][1] * 2) - 1), rect[1], rect[2]), rects)
 
-    # cv2.imshow('result', img)
+    output_images['result'] = img
 
     return rects
 
@@ -99,7 +99,8 @@ if __name__ == '__main__':
     #     print(cv2.getTrackbarPos('min', 'bin'), cv2.getTrackbarPos('max', 'bin'))
     #     cv2.waitKey(1)
 
-    rects = find(img)
+    output_images = {}
+    rects = find(img, output_images=output_images)
 
     # cv2.imshow('img', img)
 
