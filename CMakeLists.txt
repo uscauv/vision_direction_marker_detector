@@ -7,6 +7,7 @@ project(direction_marker_detector)
 find_package(catkin REQUIRED COMPONENTS
     rospy
     vision_common
+    sensor_msgs
 )
 
 ## System dependencies are found with CMake's conventions

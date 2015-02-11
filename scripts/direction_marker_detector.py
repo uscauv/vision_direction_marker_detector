@@ -1,9 +1,9 @@
 import math
+
 import numpy as np
 
 import cv2
-
-import vision_common
+import vision_util as vision_common
 
 
 def hull_score(hull):
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     img = cv2.imread('sample.jpg', cv2.IMREAD_COLOR)
 
     # while True:
-    #     find(img, val_min=cv2.getTrackbarPos('min', 'bin'), val_max=cv2.getTrackbarPos('max', 'bin'))
+    # find(img, val_min=cv2.getTrackbarPos('min', 'bin'), val_max=cv2.getTrackbarPos('max', 'bin'))
     #     print(cv2.getTrackbarPos('min', 'bin'), cv2.getTrackbarPos('max', 'bin'))
     #     cv2.waitKey(1)
 
