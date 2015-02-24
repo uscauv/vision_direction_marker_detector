@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     bridge = CvBridge()
 
-    rate = rospy.Rate(30)  # 30hz
+    rate = rospy.Rate(10)
 
     image_index = 0
     while not rospy.is_shutdown():
